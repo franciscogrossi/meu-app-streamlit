@@ -1,4 +1,12 @@
 import os
+
+# Verifica se o Google Chrome já está instalado, senão instala
+if "google-chrome" not in os.popen("apt list --installed").read():
+    os.system("wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -")
+    os.system("echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list.d/google-chrome.list")
+    os.system("apt-get update")
+    os.system("apt-get install -y google-chrome-stable")
+
 import streamlit as st
 import time
 import pandas as pd

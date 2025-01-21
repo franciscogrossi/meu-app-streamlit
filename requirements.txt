@@ -2,5 +2,4 @@ streamlit
 pandas
 selenium
 webdriver-manager
-chromedriver-autoinstaller
-bs4
+beautifulsoup4
