@@ -1,2 +1,15 @@
+wget
+gnupg
+ca-certificates
+software-properties-common
+curl
+apt-transport-https
+
+# Adicionar repositório oficial do Google Chrome
+RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-keyring.gpg
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
+
+# Instalar o Google Chrome
 google-chrome-stable
+
 
