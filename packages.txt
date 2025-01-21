@@ -1,7 +1,5 @@
 chromium
 chromium-driver
-
-# Para compilar Pillow e pandas com zlib, PNG, etc.:
 zlib1g-dev
 libjpeg-dev
 libpng-dev
