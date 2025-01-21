@@ -555,27 +555,23 @@ with st.container():
         st.markdown(f"<h3>Buscando dados de <em>{jogador}</em> (somente Premier League)...</h3>", unsafe_allow_html=True)
 
         try:
-            from selenium.webdriver.common.by import By
-
             slug = TIMES_JOGADORES_ID[time_selecionado][jogador]
             nome_para_url = jogador.replace(" ", "-")
             url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
 
-           from selenium.webdriver.chrome.options import Options
+            # Configurações para rodar o Chrome no modo headless
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")  # Executar sem interface gráfica
+            chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
+            chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
 
-        # Configurações para rodar o Chrome no modo headless
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Executar sem interface gráfica
-        chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
-        chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
+            # Inicializando o driver com as opções configuradas
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
 
-        # Inicializando o driver com as opções configuradas
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
-        # Acessando a URL
-        driver.get(url)
-        time.sleep(5)
+            # Acessando a URL
+            driver.get(url)
+            time.sleep(5)
 
 
 
