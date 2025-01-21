@@ -571,7 +571,7 @@ with st.container():
             chrome_options.add_argument("--headless")  # Executar sem interface gráfica
             chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memória
-            chrome_options.binary_location = "/usr/bin/chromium-browser"  # Caminho do Chrome no Streamlit Cloud
+            chrome_options.binary_location = "/usr/bin/google-chrome-stable"  # Caminho do Chrome no Streamlit Cloud
 
             # Inicializar o driver com as opções configuradas
             driver = webdriver.Chrome(options=chrome_options)
