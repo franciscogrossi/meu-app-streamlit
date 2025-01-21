@@ -1,12 +1,4 @@
 import os
-
-# Configurar repositório e instalar o Google Chrome
-if "google-chrome" not in os.popen("apt list --installed").read():
-    os.system("wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -")
-    os.system('echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list')
-    os.system("sudo apt-get update")
-    os.system("sudo apt-get install -y google-chrome-stable")
-
 import streamlit as st
 import time
 import pandas as pd
@@ -586,13 +578,16 @@ with st.container():
             chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memória
 
-            # Especificar o caminho do Chrome
-            chrome_options.binary_location = "/usr/bin/google-chrome"  # Caminho padrão do Chrome no Streamlit Cloud
+            # Especificar o caminho do Chrome (ajustado para o Heroku)
+            chrome_options.binary_location = "/app/.heroku/chrome-for-testing/chrome"
 
+            # Instalar automaticamente o ChromeDriver
+            chromedriver_path = chromedriver_autoinstaller.install()
 
             # Inicializar o driver com as opções configuradas
-            driver = webdriver.Chrome(options=chrome_options)
-
+            service = Service(chromedriver_path)
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            
             # Acessando a URL
             driver.get(url)
             time.sleep(5)
