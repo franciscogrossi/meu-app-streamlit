@@ -559,6 +559,11 @@ with st.container():
             nome_para_url = jogador.replace(" ", "-")
             url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
 
+            import chromedriver_autoinstaller
+
+            # Instalar automaticamente a versão correta do ChromeDriver
+            chromedriver_autoinstaller.install()
+
             # Configurações para rodar o Chrome no modo headless
             chrome_options = Options()
             chrome_options.add_argument("--headless")  # Executar sem interface gráfica
@@ -566,8 +571,7 @@ with st.container():
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
 
             # Inicializando o driver com as opções configuradas
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver = webdriver.Chrome(options=chrome_options)
 
             # Acessando a URL
             driver.get(url)
