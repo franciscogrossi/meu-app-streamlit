@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Dicionário de IDs (slugs) do FBref para cada jogador
@@ -560,10 +561,22 @@ with st.container():
             nome_para_url = jogador.replace(" ", "-")
             url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
 
+           from selenium.webdriver.chrome.options import Options
+
+            # Configurações para rodar o Chrome no modo headless
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")  # Executar sem interface gráfica
+            chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
+            chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
+
+            # Inicializando o driver com as opções configuradas
             service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service)
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+
+            # Acessando a URL
             driver.get(url)
             time.sleep(5)
+
 
             # Tentar clicar no botão "Show matches as unused substitute", se existir
             try:
