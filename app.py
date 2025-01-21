@@ -9,6 +9,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
+# Verificar o caminho do Chrome instalado
+chrome_path = os.popen("which google-chrome").read().strip()
+print(f"Chrome found at: {chrome_path}")
+
 # Dicionário de IDs (slugs) do FBref para cada jogador
 TIMES_JOGADORES_ID = {
     "Arsenal": {
@@ -573,6 +577,9 @@ with st.container():
             chrome_options.add_argument("--headless")  # Executar sem interface gráfica
             chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memória
+
+            # Especificar o caminho do Chrome no ambiente remoto
+            chrome_options.binary_location = "/usr/bin/google-chrome"  # Caminho padrão do Chrome
 
             # Inicializar o driver com as opções configuradas
             driver = webdriver.Chrome(options=chrome_options)
