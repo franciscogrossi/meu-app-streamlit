@@ -563,19 +563,20 @@ with st.container():
 
            from selenium.webdriver.chrome.options import Options
 
-            # Configurações para rodar o Chrome no modo headless
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")  # Executar sem interface gráfica
-            chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
-            chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
+        # Configurações para rodar o Chrome no modo headless
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Executar sem interface gráfica
+        chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
 
-            # Inicializando o driver com as opções configuradas
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Inicializando o driver com as opções configuradas
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
 
-            # Acessando a URL
-            driver.get(url)
-            time.sleep(5)
+        # Acessando a URL
+        driver.get(url)
+        time.sleep(5)
+
 
 
             # Tentar clicar no botão "Show matches as unused substitute", se existir
