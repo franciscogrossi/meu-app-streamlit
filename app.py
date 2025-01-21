@@ -560,17 +560,20 @@ with st.container():
             url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
 
             import chromedriver_autoinstaller
+            from selenium.webdriver.chrome.options import Options
+            from selenium import webdriver
 
-            # Instalar automaticamente a versão correta do ChromeDriver
+            # Instalar automaticamente o ChromeDriver
             chromedriver_autoinstaller.install()
 
-            # Configurações para rodar o Chrome no modo headless
+            # Configurar o Chrome no modo headless
             chrome_options = Options()
             chrome_options.add_argument("--headless")  # Executar sem interface gráfica
             chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
+            chrome_options.binary_location = "/usr/bin/chromium-browser"  # Caminho do Chrome no Streamlit Cloud
 
-            # Inicializando o driver com as opções configuradas
+            # Inicializar o driver com as opções configuradas
             driver = webdriver.Chrome(options=chrome_options)
 
             # Acessando a URL
