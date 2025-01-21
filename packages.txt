@@ -3,4 +3,3 @@ ca-certificates
 software-properties-common
 curl
 apt-transport-https
-google-chrome-stable

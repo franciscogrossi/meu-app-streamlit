@@ -1,4 +1,12 @@
 import os
+
+# Configurar repositório e instalar o Google Chrome
+if "google-chrome" not in os.popen("apt list --installed").read():
+    os.system("wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -")
+    os.system('echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list')
+    os.system("sudo apt-get update")
+    os.system("sudo apt-get install -y google-chrome-stable")
+
 import streamlit as st
 import time
 import pandas as pd
@@ -578,8 +586,9 @@ with st.container():
             chrome_options.add_argument("--no-sandbox")  # Necessário em servidores remotos
             chrome_options.add_argument("--disable-dev-shm-usage")  # Evitar problemas de memória
 
-            # Especificar o caminho do Chrome no ambiente remoto
-            chrome_options.binary_location = "/usr/bin/google-chrome"  # Caminho padrão do Chrome
+            # Especificar o caminho do Chrome
+            chrome_options.binary_location = "/usr/bin/google-chrome"  # Caminho padrão do Chrome no Streamlit Cloud
+
 
             # Inicializar o driver com as opções configuradas
             driver = webdriver.Chrome(options=chrome_options)
