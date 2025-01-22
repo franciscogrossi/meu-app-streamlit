@@ -493,6 +493,7 @@ TIMES_JOGADORES_ID = {
 
 PAGE_CSS = """
 <style>
+/* Estilos Gerais */
 body {
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
@@ -507,6 +508,14 @@ h1, h2, h3 {
 hr {
     margin: 2rem 0;
 }
+.container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabela Personalizada */
 .custom-table {
     border-collapse: collapse;
     width: 100%;
@@ -524,17 +533,65 @@ hr {
 .custom-table tbody tr:hover {
     background-color: #f0f0f0;
 }
-.container {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
+
+/* Responsividade */
+@media only screen and (max-width: 768px) {
+    .main .block-container{
+        padding: 1rem 1rem 1rem 1rem;
+    }
+
+    /* Reduzir o tamanho da fonte em telas menores */
+    html, body, [class*="css"]  {
+        font-size: 14px;
+    }
+
+    /* Tornar a tabela rolável horizontalmente */
+    .custom-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Ajustar padding nas células da tabela */
+    .custom-table td, .custom-table th {
+        padding: 6px !important;
+        font-size: 12px;
+    }
+
+    /* Ajustar container para telas pequenas */
+    .container {
+        padding: 1rem;
+    }
 }
+@media only screen and (max-width: 480px) {
+    /* Reduzir ainda mais o tamanho da fonte em telas muito pequenas */
+    html, body, [class*="css"]  {
+        font-size: 12px;
+    }
+
+    .custom-table td, .custom-table th {
+        padding: 4px !important;
+        font-size: 10px;
+    }
+
+    .container {
+        padding: 0.5rem;
+    }
+}
+
+/* Remover elementos padrão do Streamlit (opcional) */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 </style>
 """
 
-st.set_page_config(page_title="Análise de Finalizações - Premier League (Somente PL)", layout="centered")
+# Configuração da Página
+st.set_page_config(page_title="Análise de Finalizações - Premier League", layout="wide")
+
+# Aplicar CSS Personalizado
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
+# Título e Subtítulo
 st.markdown("<h1>Análise de Finalizações - Premier League</h1>", unsafe_allow_html=True)
 st.markdown("<p class='custom-subtitle'>Somente partidas da Premier League (excluindo Champions, Copas, etc.)</p>", unsafe_allow_html=True)
 
@@ -545,10 +602,15 @@ with st.container():
         st.session_state["df_jogos"] = pd.DataFrame()
 
     # Seletor de Time e Jogador
-    time_selecionado = st.selectbox("Selecione o Time", list(TIMES_JOGADORES_ID.keys()))
-    jogador = st.selectbox("Selecione o Jogador", list(TIMES_JOGADORES_ID[time_selecionado].keys()))
-    num_jogos = st.slider("Número de Jogos Analisados", 1, 30, 10)
+    col1, col2, col3 = st.columns([3, 3, 1])
+    with col1:
+        time_selecionado = st.selectbox("Selecione o Time", list(TIMES_JOGADORES_ID.keys()))
+    with col2:
+        jogador = st.selectbox("Selecione o Jogador", list(TIMES_JOGADORES_ID[time_selecionado].keys()))
+    with col3:
+        num_jogos = st.slider("Número de Jogos Analisados", 1, 30, 10)
 
+    # Botão de Análise
     if st.button("Analisar"):
         st.markdown("<hr>", unsafe_allow_html=True)
         st.markdown(f"<h3>Buscando dados de <em>{jogador}</em> (somente Premier League)...</h3>", unsafe_allow_html=True)
@@ -646,6 +708,8 @@ with st.container():
     # Exibir e filtrar (Casa/Fora)
     df_jogos = st.session_state["df_jogos"]
     if not df_jogos.empty:
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown("<h3>Filtros</h3>", unsafe_allow_html=True)
         filtro_local = st.radio("Filtrar Jogos (Casa ou Fora)?", ["Todos", "Casa", "Fora"], index=0)
         df_filtrado = df_jogos.copy()
 
@@ -658,7 +722,6 @@ with st.container():
             df_filtrado.reset_index(drop=True, inplace=True)
             df_filtrado.index = df_filtrado.index + 1
 
-            st.markdown("<hr>", unsafe_allow_html=True)
             st.markdown(f"<h4>Jogos Filtrados: {filtro_local}</h4>", unsafe_allow_html=True)
 
             # Renderiza tabela final
@@ -698,4 +761,4 @@ with st.container():
             st.markdown("<h4>Estatísticas de Over (Filtro)</h4>", unsafe_allow_html=True)
             st.markdown(overs_html, unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True) 
+    st.markdown("</div>", unsafe_allow_html=True)
