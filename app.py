@@ -493,11 +493,20 @@ TIMES_JOGADORES_ID = {
 
 PAGE_CSS = """
 <style>
-/* Estilos Gerais */
+/* Layout Geral */
 body {
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
 }
+.main .block-container {
+    max-width: 1100px; /* Ajuste se desejar limitar a largura máxima em desktops */
+    margin: 0 auto;
+}
+/* Remover menu e rodapé do Streamlit (opcional) */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* Títulos e textos */
 h1, h2, h3 {
     color: #2B2B2B;
 }
@@ -508,18 +517,27 @@ h1, h2, h3 {
 hr {
     margin: 2rem 0;
 }
+
+/* Container principal */
 .container {
     background-color: #fff;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Tabela Personalizada */
+/* Container que envolve a tabela, permitindo scroll horizontal */
+.table-container {
+    width: 100%;
+    overflow-x: auto;  /* Rolagem horizontal */
+    margin-top: 1rem;
+}
+
+/* Tabela customizada */
 .custom-table {
     border-collapse: collapse;
     width: 100%;
-    margin: 1rem 0;
+    min-width: 700px; /* Força a tabela a ter no mínimo 700px, por ex., se preferir */
 }
 .custom-table th {
     background-color: #f5f5f5;
@@ -536,68 +554,48 @@ hr {
 
 /* Responsividade */
 @media only screen and (max-width: 768px) {
-    .main .block-container{
-        padding: 1rem 1rem 1rem 1rem;
+    .main .block-container {
+        padding: 1rem !important;
     }
-
-    /* Reduzir o tamanho da fonte em telas menores */
-    html, body, [class*="css"]  {
-        font-size: 14px;
-    }
-
-    /* Tornar a tabela rolável horizontalmente */
-    .custom-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
-    /* Ajustar padding nas células da tabela */
-    .custom-table td, .custom-table th {
-        padding: 6px !important;
-        font-size: 12px;
-    }
-
-    /* Ajustar container para telas pequenas */
     .container {
         padding: 1rem;
     }
-}
-@media only screen and (max-width: 480px) {
-    /* Reduzir ainda mais o tamanho da fonte em telas muito pequenas */
-    html, body, [class*="css"]  {
+    /* Fonte e espaçamentos menores em telas pequenas */
+    html, body, [class*="css"] {
+        font-size: 14px;
+    }
+    .custom-table td, .custom-table th {
+        padding: 6px;
         font-size: 12px;
     }
-
-    .custom-table td, .custom-table th {
-        padding: 4px !important;
-        font-size: 10px;
+}
+@media only screen and (max-width: 480px) {
+    html, body, [class*="css"] {
+        font-size: 12px;
     }
-
-    .container {
-        padding: 0.5rem;
+    .custom-table td, .custom-table th {
+        padding: 4px;
+        font-size: 11px;
     }
 }
-
-/* Remover elementos padrão do Streamlit (opcional) */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
 </style>
 """
 
-# Configuração da Página
-st.set_page_config(page_title="Análise de Finalizações - Premier League", layout="wide")
+# Configuração de página do Streamlit
+st.set_page_config(page_title="Análise de Finalizações - Premier League", layout="centered")
 
-# Aplicar CSS Personalizado
+# Aplicar CSS personalizado
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-# Título e Subtítulo
+# Título
 st.markdown("<h1>Análise de Finalizações - Premier League</h1>", unsafe_allow_html=True)
 st.markdown("<p class='custom-subtitle'>Somente partidas da Premier League (excluindo Champions, Copas, etc.)</p>", unsafe_allow_html=True)
 
+# Container principal
 with st.container():
     st.markdown("<div class='container'>", unsafe_allow_html=True)
 
+    # Estado da sessão para armazenar dataframe de jogos
     if "df_jogos" not in st.session_state:
         st.session_state["df_jogos"] = pd.DataFrame()
 
@@ -608,9 +606,9 @@ with st.container():
     with col2:
         jogador = st.selectbox("Selecione o Jogador", list(TIMES_JOGADORES_ID[time_selecionado].keys()))
     with col3:
-        num_jogos = st.slider("Número de Jogos Analisados", 1, 30, 10)
+        num_jogos = st.slider("N° Jogos Analisados", 1, 30, 10)
 
-    # Botão de Análise
+    # Botão para Analisar
     if st.button("Analisar"):
         st.markdown("<hr>", unsafe_allow_html=True)
         st.markdown(f"<h3>Buscando dados de <em>{jogador}</em> (somente Premier League)...</h3>", unsafe_allow_html=True)
@@ -620,24 +618,23 @@ with st.container():
             nome_para_url = jogador.replace(" ", "-")
             url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
 
-            # Configuração para rodar Chrome headless no ambiente do Streamlit
+            # Configurar Chrome headless
             chrome_options = Options()
             chrome_options.add_argument("--headless")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
-            # Se existir o binário do Chrome em /usr/bin/chromium, definimos explicitamente:
             if os.path.exists('/usr/bin/chromium'):
                 chrome_options.binary_location = '/usr/bin/chromium'
-
             service = Service('/usr/bin/chromedriver')
             driver = webdriver.Chrome(service=service, options=chrome_options)
+
             driver.get(url)
             time.sleep(5)
 
-            # Tentar clicar no botão "Show matches as unused substitute", se existir
+            # Tentar clicar no botão "Show matches as unused substitute"
             try:
-                show_unused_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Show matches as unused substitute")
-                show_unused_button.click()
+                btn = driver.find_element(By.PARTIAL_LINK_TEXT, "Show matches as unused substitute")
+                btn.click()
                 time.sleep(2)
             except:
                 pass
@@ -647,7 +644,7 @@ with st.container():
 
             all_dfs = pd.read_html(str(soup))
 
-            # Precisamos das colunas: [Date, Squad, Opponent, Venue, Sh, Min, Comp]
+            # Colunas necessárias
             colunas_necessarias = {"Date", "Squad", "Opponent", "Venue", "Sh", "Min", "Comp"}
             lista_validas = []
             for df_temp in all_dfs:
@@ -657,13 +654,10 @@ with st.container():
                     lista_validas.append(df_temp)
 
             if not lista_validas:
-                st.error("Não encontramos tabelas com as colunas [Date, Squad, Opponent, Venue, Sh, Min, Comp].")
+                st.error("Não encontramos a tabela com as colunas [Date, Squad, Opponent, Venue, Sh, Min, Comp].")
                 st.stop()
 
-            # Concatena todos os DF válidos
             df = pd.concat(lista_validas, ignore_index=True)
-
-            # Remover linhas inválidas
             invalid = ["Date", "Opponent", "Venue", "Sh", "Performance", "None"]
             df = df[~df["Date"].isin(invalid)]
 
@@ -671,21 +665,19 @@ with st.container():
             df = df[["Date", "Comp", "Squad", "Opponent", "Venue", "Sh", "Min"]]
             df.columns = ["Data", "Competicao", "Equipe", "Adversario", "CasaFora", "Finalizacoes", "Minutos"]
 
-            # Somente o time selecionado
+            # Filtra pelo time e Premier League
             df = df[df["Equipe"] == time_selecionado]
-
-            # Somente Premier League
             df = df[df["Competicao"] == "Premier League"]
-
-            # Remove "Performance" e converte
             df = df[df["Finalizacoes"] != "Performance"]
+
+            # Converte colunas
             df["Finalizacoes"] = pd.to_numeric(df["Finalizacoes"], errors="coerce").fillna(0).astype(int)
             df["Minutos"] = pd.to_numeric(df["Minutos"], errors="coerce").fillna(0).astype(int)
 
-            # Exclui jogos sem atuação (Min=0)
+            # Excluir jogos sem atuação
             df = df[df["Minutos"] != 0]
 
-            # Ordena datas
+            # Ordena
             df["Data"] = pd.to_datetime(df["Data"])
             df.sort_values("Data", ascending=False, inplace=True)
             df.reset_index(drop=True, inplace=True)
@@ -705,14 +697,13 @@ with st.container():
         except Exception as e:
             st.error(f"Erro ao buscar os dados: {e}")
 
-    # Exibir e filtrar (Casa/Fora)
+    # Exibir resultados
     df_jogos = st.session_state["df_jogos"]
     if not df_jogos.empty:
         st.markdown("<hr>", unsafe_allow_html=True)
         st.markdown("<h3>Filtros</h3>", unsafe_allow_html=True)
         filtro_local = st.radio("Filtrar Jogos (Casa ou Fora)?", ["Todos", "Casa", "Fora"], index=0)
         df_filtrado = df_jogos.copy()
-
         if filtro_local != "Todos":
             df_filtrado = df_filtrado[df_filtrado["CasaFora"] == filtro_local]
 
@@ -724,7 +715,8 @@ with st.container():
 
             st.markdown(f"<h4>Jogos Filtrados: {filtro_local}</h4>", unsafe_allow_html=True)
 
-            # Renderiza tabela final
+            # Colocar a tabela dentro de um DIV com overflow horizontal
+            st.markdown("<div class='table-container'>", unsafe_allow_html=True)
             tabela_html = df_filtrado.to_html(
                 classes="custom-table",
                 index=True,
@@ -732,12 +724,13 @@ with st.container():
                 justify="center"
             )
             st.markdown(tabela_html, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
             # Média de finalizações
             media_f = df_filtrado["Finalizacoes"].mean()
             st.markdown(f"<p><strong>Média de Finalizações (Filtro):</strong> {media_f:.2f}</p>", unsafe_allow_html=True)
 
-            # Overs, incluindo Over 0,5
+            # Estatísticas Over
             over_lines = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
             total_jogos = len(df_filtrado)
             resultados = []
@@ -752,13 +745,11 @@ with st.container():
                     "Odd Justa": odd_justa
                 })
             df_overs = pd.DataFrame(resultados)
-            overs_html = df_overs.to_html(
-                classes="custom-table",
-                index=False,
-                border=0,
-                justify="center"
-            )
+
             st.markdown("<h4>Estatísticas de Over (Filtro)</h4>", unsafe_allow_html=True)
+            st.markdown("<div class='table-container'>", unsafe_allow_html=True)
+            overs_html = df_overs.to_html(classes="custom-table", index=False, border=0, justify="center")
             st.markdown(overs_html, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
