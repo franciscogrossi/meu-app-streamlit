@@ -660,7 +660,7 @@ with st.container():
             service = Service('/usr/bin/chromedriver')
             driver = webdriver.Chrome(service=service, options=chrome_options)
             driver.get(url)
-            time.sleep(5)
+            time.sleep(4)
 
             # Tenta exibir jogos de substituto não-utilizado
             try:
