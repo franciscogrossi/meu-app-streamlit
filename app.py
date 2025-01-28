@@ -729,7 +729,7 @@ footer {visibility: hidden;}
     position: relative;
     margin: 0;
     padding: 0;
-    font-size: 20em;  /* <-- Aumente conforme desejar */
+    font-size: 50em;  /* <-- Aumente conforme desejar */
     color: #2B2B2B;
 }
 
