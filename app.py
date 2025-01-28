@@ -724,15 +724,13 @@ footer {visibility: hidden;}
 .logo-container img {
     max-width: 120px; /* Ajuste o tamanho máximo da logo */
     height: auto;
+    margin-right: 20px; /* Espaço à direita da imagem */
 }
-.custom-table {
-    margin: 0 auto;
-    border-collapse: collapse;
-}
-.custom-table th, .custom-table td {
-    padding: 6px 12px;
-    border: 1px solid #ddd;
-    text-align: center;
+.logo-title {
+    margin: 0; 
+    padding: 0;
+    font-size: 1.8em; /* Ajuste do tamanho da fonte do título */
+    color: #2B2B2B;
 }
 </style>
 """
@@ -741,7 +739,7 @@ st.set_page_config(page_title="Análise - Ligas", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
 # ==============================================
-# EXIBIR A LOGO NO CABEÇALHO (USANDO BASE64 + CSS)
+# EXIBIR A LOGO E O TÍTULO NO CABEÇALHO
 # ==============================================
 logo_path = "logo.png"
 try:
@@ -750,6 +748,7 @@ try:
         f"""
         <div class="logo-container">
             <img src="data:image/png;base64,{logo_base64}" alt="Logo">
+            <h2 class="logo-title">BetStats Pro</h2>
         </div>
         """,
         unsafe_allow_html=True
