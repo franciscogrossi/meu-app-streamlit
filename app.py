@@ -621,7 +621,7 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
     if subpath:
         url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{subpath}/{nome_jogador}-Match-Logs"
     else:
-        url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_para_url}-Match-Logs"
+        url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{nome_jogador}-Match-Logs"
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -635,7 +635,6 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
     driver.get(url)
     time.sleep(4)
 
-    # Tenta mostrar jogos como unused sub, se houver
     try:
         show_unused_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Show matches as unused substitute")
         show_unused_button.click()
@@ -659,7 +658,6 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
 
     df = pd.concat(lista_validas, ignore_index=True)
 
-    # Remove linhas duplicadas de cabeçalho
     invalid = ["Date", "Opponent", "Venue", "Performance", "None"]
     df = df[~df["Date"].isin(invalid)]
 
@@ -704,17 +702,33 @@ h1 {
     margin: 0.3em 0 0.2em 0;
     color: #2B2B2B;
 }
-/* ... demais estilos ... */
-
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px 0;
+}
+.logo-container img {
+    max-width: 120px;
+    height: auto;
+}
 </style>
 """
 
 st.set_page_config(page_title="Análise - Ligas", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-st.markdown("<h1>Análise - Ligas</h1>", unsafe_allow_html=True)
+# Adicionar a logo ao cabeçalho
+st.markdown(
+    """
+    <div class="logo-container">
+        <img src="logo.png" alt="Logo">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ==============================================
 # APP
@@ -765,17 +779,14 @@ if st.button("Analisar"):
         st.error("Nenhum dado encontrado (DF vazio). Verifique o CSV ou a raspagem.")
         st.session_state["df_jogos"] = pd.DataFrame()
     else:
-        # Filtro pela liga para exibir só Premier ou La Liga
         if liga_selecionada == "Premier League":
             df = df[df["Competicao"] == "Premier League"]
         elif liga_selecionada == "La Liga":
-            df = df[df["Competicao"] == "La Liga"]  # Ajuste se for "Primera División"
+            df = df[df["Competicao"] == "La Liga"]
 
-        # Remove não atuou (Min = 0)
         df["Minutos"] = pd.to_numeric(df["Minutos"], errors="coerce").fillna(0).astype(int)
         df = df[df["Minutos"] != 0]
 
-        # Converte col. estatística principal
         nome_coluna_principal = config["nome_coluna_final"]
         df[nome_coluna_principal] = (
             pd.to_numeric(df[nome_coluna_principal], errors="coerce")
@@ -783,16 +794,13 @@ if st.button("Analisar"):
             .astype(int)
         )
 
-        # Ordena por data desc
         df["Data"] = pd.to_datetime(df["Data"])
         df.sort_values("Data", ascending=False, inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        # Filtra últimos N
         df = df.head(num_jogos)
         df.index = df.index + 1
 
-        # Ajusta data e CasaFora
         df["Data"] = df["Data"].dt.strftime("%d/%m/%y")
         df["CasaFora"] = df["CasaFora"].replace({
             "Home": "Casa",
@@ -800,7 +808,6 @@ if st.button("Analisar"):
             "Neutral": "Neutro"
         })
 
-        # Remove col. Equipe (não precisamos exibir)
         if "Equipe" in df.columns:
             df.drop(columns=["Equipe"], inplace=True)
 
@@ -822,11 +829,9 @@ if not df_jogos.empty:
         df_filtrado.reset_index(drop=True, inplace=True)
         df_filtrado.index = df_filtrado.index + 1
 
-        # Exibe tabela
         tabela_html = df_filtrado.to_html(classes="custom-table", index=True, border=0, justify="center")
         st.markdown(tabela_html, unsafe_allow_html=True)
 
-        # Cálculo da média
         if estatistica_escolhida:
             nome_coluna_principal = STATS_CONFIG[estatistica_escolhida]["nome_coluna_final"]
         else:
@@ -838,7 +843,6 @@ if not df_jogos.empty:
             unsafe_allow_html=True
         )
 
-        # Tabela de overs
         over_lines = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
         total_jogos = len(df_filtrado)
         resultados = []
