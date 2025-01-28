@@ -592,14 +592,7 @@ LIGAS = {
             "Ronald Araújo": "2bef2bca",
             "Andreas Christensen": "1cb49278"
         },
-        "Real Madrid": {
-            "Vinicius Jr.": "some_slug3",
-            "Jude Bellingham": "some_slug4"
-            # ...
-        }
-        # ... (demais times da La Liga)
     }
-}
 
 # ==============================================
 # CONFIG DE ESTATÍSTICAS
