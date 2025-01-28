@@ -495,9 +495,30 @@ LIGAS = {
 
     "La Liga": {
         "Barcelona": {
-            "Robert Lewandowski": "some_slug",
-            "Pedri": "some_slug2"
-            # ...
+            "Raphinha": "3423f250",
+            "Jules Koundé": "4d1666ff",
+            "Pau Cubarsí": "cc7888f3",
+            "Robert Lewandowski": "8d78e732",
+            "Iñigo Martínez": "3fc45c73",
+            "Pedri": "0d9b2d31",
+            "Alejandro Balde": "5ccc9672",
+            "Lamine Yamal": "82ec26c1",
+            "Marc Casado": "2ef08833",
+            "Dani Olmo": "ae44e8e2",
+            "Ferrán Torres": "9e1035f8",
+            "Eric García": "2bed3eab",
+            "Fermin López": "c1fe5f0b",
+            "Gerard Martín": "b792c59d",
+            "Gavi": "19cae58d",
+            "Pablo Torre": "04e531b6",
+            "Marc Bernal": "29117812",
+            "Frenkie de Jong": "1bacc518",
+            "Héctor Fort": "2e31f3a6",
+            "Sergi Dominguez": "88507352",
+            "Pau Victor Delgado": "e6e7c819",
+            "Ansu Fati": "0ba976e4",
+            "Ronald Araújo": "2bef2bca",
+            "Andreas Christensen": "1cb49278"
         },
         "Real Madrid": {
             "Vinicius Jr.": "some_slug3",
