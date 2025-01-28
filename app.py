@@ -598,7 +598,7 @@ html, body, [class*="css"] {
 
 /* Manter h1 grande em comparação ao resto */
 h1 {
-    font-size: 1.7em; /* Ajuste como preferir p/ destacar */
+    font-size: 2em; /* Ajuste como preferir p/ destacar */
     margin: 0.3em 0 0.2em 0; 
     color: #2B2B2B;
 }
