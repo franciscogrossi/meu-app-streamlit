@@ -513,8 +513,7 @@ STATS_CONFIG = {
 }
 
 # --------------------------------------------------
-# FUNÇÃO RASPAGEM COM SELENIUM + CACHE
-# show_spinner=False para não exibir "Running scrape_fbref(...)"
+# FUNÇÃO RASPAGEM COM SELENIUM (COM CACHE)
 # --------------------------------------------------
 @st.cache_data(ttl=600, show_spinner=False)
 def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_fbref, nome_coluna_final):
@@ -536,6 +535,7 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
     driver.get(url)
     time.sleep(4)
 
+    # Tenta mostrar jogos como unused sub
     try:
         show_unused_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Show matches as unused substitute")
         show_unused_button.click()
@@ -579,15 +579,13 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
 
     return df
 
-
 # --------------------------------------------------
-# DADOS OFFLINE (CSV) CASO NECESSÁRIO
+# DADOS OFFLINE (CSV), CASO NECESSÁRIO
 # --------------------------------------------------
 def load_offline_data(csv_path: str) -> pd.DataFrame:
     if not os.path.exists(csv_path):
         return pd.DataFrame()
     return pd.read_csv(csv_path)
-
 
 # --------------------------------------------------
 # CSS / CONFIG STREAMLIT
@@ -595,10 +593,14 @@ def load_offline_data(csv_path: str) -> pd.DataFrame:
 PAGE_CSS = """
 <style>
 /* Estilos Gerais */
-body {
+/* DIMINUÍMOS LEVEMENTE PARA, POR EXEMPLO, 13PX (ANTES ERA 14PX) */
+html, body, [class*="css"] {
+    font-size: 13px;
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
 }
+
+/* Ajustes de cabeçalhos */
 h1, h2, h3 {
     color: #2B2B2B;
 }
@@ -640,9 +642,12 @@ hr {
     .main .block-container{
         padding: 1rem 1rem 1rem 1rem;
     }
-    html, body, [class*="css"]  {
-        font-size: 14px;
+
+    /* Reduzir um pouco mais em telas médias */
+    html, body, [class*="css"] {
+        font-size: 12px;
     }
+
     .custom-table {
         display: block;
         overflow-x: auto;
@@ -657,8 +662,9 @@ hr {
     }
 }
 @media only screen and (max-width: 480px) {
-    html, body, [class*="css"]  {
-        font-size: 12px;
+    /* Em telas bem pequenas, reduzimos mais um pouco */
+    html, body, [class*="css"] {
+        font-size: 11px;
     }
     .custom-table td, .custom-table th {
         padding: 4px !important;
@@ -679,7 +685,7 @@ st.set_page_config(page_title="Análise - Premier League (Beta)", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
 st.markdown("<h1>Análise - Premier League (Beta)</h1>", unsafe_allow_html=True)
-st.markdown("<p class='custom-subtitle'>Agora com spinner customizado (⚽) e sem logs extras!</p>", unsafe_allow_html=True)
+st.markdown("<p class='custom-subtitle'>Agora sem coluna 'Equipe' e com fontes levemente menores.</p>", unsafe_allow_html=True)
 
 # --------------------------------------------------
 # APP PRINCIPAL
@@ -711,7 +717,6 @@ with st.container():
         slug = TIMES_JOGADORES_ID[time_selecionado][jogador]
         nome_para_url = jogador.replace(" ", "-")
 
-        # Aparece apenas UMA barra de carregamento com emoji de futebol
         with st.spinner("⚽ Buscando informações do jogador..."):
             if usar_offline:
                 csv_name = f"dados_offline_{time_selecionado}_{jogador}_{estatistica}.csv"
@@ -731,12 +736,14 @@ with st.container():
             st.error("Nenhum dado encontrado (DF vazio). Verifique a raspagem ou o CSV.")
             st.session_state["df_jogos"] = pd.DataFrame()
         else:
-            df = df[df["Equipe"] == time_selecionado]
+            # Filtra somente Premier League
             df = df[df["Competicao"] == "Premier League"]
 
+            # Remove jogadores sem minutos
             df["Minutos"] = pd.to_numeric(df["Minutos"], errors="coerce").fillna(0).astype(int)
             df = df[df["Minutos"] != 0]
 
+            # Converte a estatística principal
             nome_coluna_principal = config["nome_coluna_final"]
             df[nome_coluna_principal] = (
                 pd.to_numeric(df[nome_coluna_principal], errors="coerce")
@@ -744,18 +751,26 @@ with st.container():
                   .astype(int)
             )
 
+            # Ordena datas desc
             df["Data"] = pd.to_datetime(df["Data"])
             df.sort_values("Data", ascending=False, inplace=True)
             df.reset_index(drop=True, inplace=True)
+
+            # Pega só os últimos N jogos
             df = df.head(num_jogos)
             df.index = df.index + 1
 
+            # Converte data e local
             df["Data"] = df["Data"].dt.strftime("%d/%m/%y")
             df["CasaFora"] = df["CasaFora"].replace({
                 "Home": "Casa",
                 "Away": "Fora",
                 "Neutral": "Neutro"
             })
+
+            # REMOVE A COLUNA "Equipe", JÁ QUE SABEMOS O TIME
+            if "Equipe" in df.columns:
+                df.drop(columns=["Equipe"], inplace=True)
 
             st.session_state["df_jogos"] = df
 
