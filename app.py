@@ -707,11 +707,6 @@ html, body, [class*="css"] {
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
 }
-h1 {
-    font-size: 2em; 
-    margin: 0.3em 0 0.2em 0;
-    color: #2B2B2B;
-}
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 
@@ -721,16 +716,26 @@ footer {visibility: hidden;}
     justify-content: flex-start;
     padding: 10px 0;
 }
+
+/* Ajuste de tamanho para a logo */
 .logo-container img {
-    max-width: 120px; /* Ajuste o tamanho máximo da logo */
+    max-width: 120px; /* Tamanho máximo */
     height: auto;
     margin-right: 20px; /* Espaço à direita da imagem */
 }
-.logo-title {
-    margin: 0; 
+
+/* Aumentando o título e removendo o ícone de link (anchor-link) */
+.logo-container h2 {
+    position: relative;
+    margin: 0;
     padding: 0;
-    font-size: 1.8em; /* Ajuste do tamanho da fonte do título */
+    font-size: 2.2em;  /* <-- Aumente conforme desejar */
     color: #2B2B2B;
+}
+
+/* Esconde o ícone de link que o Streamlit gera em títulos HTML */
+.logo-container h2 a.anchor-link {
+    display: none;
 }
 </style>
 """
@@ -748,7 +753,7 @@ try:
         f"""
         <div class="logo-container">
             <img src="data:image/png;base64,{logo_base64}" alt="Logo">
-            <h2 class="logo-title">BetStats Pro</h2>
+            <h2>BetStats Pro</h2>
         </div>
         """,
         unsafe_allow_html=True
