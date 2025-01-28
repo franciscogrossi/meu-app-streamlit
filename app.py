@@ -544,6 +544,28 @@ LIGAS = {
             "Nicolás Serrano": "2ad0e5e5",
             "Javi Martón": "2381eead"
         },
+        "Atlético Madrid": {
+            "Antoine Griezmann": "df69b544",
+            "Julián Álvarez": "15ab5a2b",
+            "Pablo Barrios": "45736cec",
+            "José María Giménez": "f0da930c",
+            "Koke": "55126f3b",
+            "Conor Gallagher": "c2731c10",
+            "Marcos Llorente": "02c15616",
+            "Nahuel Molina": "23610943",
+            "Rodrigo De Paul": "162efffd",
+            "Clément Lenglet": "4f28a6ff",
+            "Robin Le Normand": "9a64e67e",
+            "Samuel Lino": "2a295d33",
+            "Javi Galán": "a4b00319",
+            "Giuliano Simeone": "a6536561",
+            "Axel Witsel": "5dfc6ad5",
+            "Reinildo Mandava": "c20bdcd7",
+            "Alexander Sørloth": "e92cd3f7",
+            "César Azpilicueta": "53cad200",
+            "Rodrigo Riquelme": "65154df0",
+            "Ángel Correa": "01eb744d"
+        },
         "Barcelona": {
             "Raphinha": "3423f250",
             "Jules Koundé": "4d1666ff",
