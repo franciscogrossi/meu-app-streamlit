@@ -512,12 +512,11 @@ STATS_CONFIG = {
     },
 }
 
-#####################################################
-# FUNÇÃO DE RASPAGEM (COM CACHE)
-#####################################################
+# --------------------------------------------------
+# FUNÇÃO DE RASPAGEM (COM CACHE) - SELENIUM
+# --------------------------------------------------
 @st.cache_data(ttl=600, show_spinner=False)
 def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_fbref, nome_coluna_final):
-    # Exemplo de URL em inglês
     if subpath:
         url = f"https://fbref.com/en/players/{slug}/matchlogs/2024-2025/{subpath}/{nome_jogador}-Match-Logs"
     else:
@@ -557,17 +556,14 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
         return pd.DataFrame()
 
     df = pd.concat(lista_validas, ignore_index=True)
-
     invalid = ["Date", "Opponent", "Venue", "Performance", "None"]
     df = df[~df["Date"].isin(invalid)]
 
-    # Mantém colunas
     colunas_para_manter = ["Date", "Comp", "Squad", "Opponent", "Venue", "Min"]
     if nome_coluna_fbref not in colunas_para_manter:
         colunas_para_manter.append(nome_coluna_fbref)
     df = df[colunas_para_manter]
 
-    # Renomeia
     renomes = {
         "Date": "Data",
         "Comp": "Competicao",
@@ -581,21 +577,41 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
 
     return df
 
-#####################################################
-# CSS E CONFIGURAÇÃO
-#####################################################
+# --------------------------------------------------
+# CARREGAR CSV OFFLINE (OPCIONAL)
+# --------------------------------------------------
+def load_offline_data(csv_path: str) -> pd.DataFrame:
+    if not os.path.exists(csv_path):
+        return pd.DataFrame()
+    return pd.read_csv(csv_path)
+
+# --------------------------------------------------
+# CSS PERSONALIZADO - SEM .container
+# --------------------------------------------------
 PAGE_CSS = """
 <style>
 html, body, [class*="css"] {
-    font-size: 13px; /* Ajuste */
+    font-size: 13px; /* Ajuste como preferir */
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
 }
+
+/* Manter h1 grande em comparação ao resto */
 h1 {
-    font-size: 2em; /* Destaque maior para o título */
-    margin: 0.3em 0 0.2em 0;
+    font-size: 1.7em; /* Ajuste como preferir p/ destacar */
+    margin: 0.3em 0 0.2em 0; 
     color: #2B2B2B;
 }
+
+h2, h3 {
+    color: #2B2B2B;
+}
+
+hr {
+    margin: 2rem 0;
+}
+
+/* Tabela Personalizada */
 .custom-table {
     border-collapse: collapse;
     width: 100%;
@@ -613,85 +629,95 @@ h1 {
 .custom-table tbody tr:hover {
     background-color: #f0f0f0;
 }
+
+/* Responsivo */
+@media only screen and (max-width: 768px) {
+    html, body, [class*="css"] {
+        font-size: 12px; 
+    }
+    .custom-table td, .custom-table th {
+        padding: 6px !important;
+        font-size: 12px;
+    }
+}
+@media only screen and (max-width: 480px) {
+    html, body, [class*="css"] {
+        font-size: 11px;
+    }
+    .custom-table td, .custom-table th {
+        padding: 4px !important;
+        font-size: 10px;
+    }
+}
+
+/* Remove Streamlit's default menu and footer */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 </style>
 """
 
-st.set_page_config(page_title="Análise - Premier League", layout="wide")  # Pode renomear se quiser
+st.set_page_config(page_title="Análise - Premier League", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-#####################################################
-# INÍCIO DO APP
-#####################################################
-st.markdown("<h1>Análise - Premier League / La Liga</h1>", unsafe_allow_html=True)
+# --------------------------------------------------
+# TÍTULO (SEM Beta, SEM SUBTÍTULO)
+# --------------------------------------------------
+st.markdown("<h1>Análise - Premier League</h1>", unsafe_allow_html=True)
 
+# --------------------------------------------------
+# APP PRINCIPAL
+# --------------------------------------------------
 if "df_jogos" not in st.session_state:
     st.session_state["df_jogos"] = pd.DataFrame()
 if "estatistica_selecionada" not in st.session_state:
     st.session_state["estatistica_selecionada"] = ""
-if "liga_selecionada" not in st.session_state:
-    st.session_state["liga_selecionada"] = ""
 
-# Passo 1: Escolher a liga
-colA, colB, colC, colD = st.columns([2, 2, 2, 2])
-with colA:
-    liga_selecionada = st.selectbox("Selecione a Liga", list(TIMES_JOGADORES_ID.keys()))
-# Passo 2: Escolher o time (com base na liga)
-with colB:
-    time_selecionado = st.selectbox("Selecione o Time", list(TIMES_JOGADORES_ID[liga_selecionada].keys()))
-# Passo 3: Escolher o jogador (com base no time)
-with colC:
-    jogador = st.selectbox(
-        "Selecione o Jogador", 
-        list(TIMES_JOGADORES_ID[liga_selecionada][time_selecionado].keys())
-    )
-# Passo 4: Escolher estatística
-with colD:
+col1, col2, col3, col4 = st.columns([3, 3, 2, 1])
+with col1:
+    time_selecionado = st.selectbox("Selecione o Time", list(TIMES_JOGADORES_ID.keys()))
+with col2:
+    jogador = st.selectbox("Selecione o Jogador", list(TIMES_JOGADORES_ID[time_selecionado].keys()))
+with col3:
     estatistica = st.selectbox("Estatística", list(STATS_CONFIG.keys()))
+with col4:
+    num_jogos = st.slider("Jogos Analisados", 1, 30, 10)
 
-# Slider para número de jogos
-num_jogos = st.slider("Jogos Analisados", 1, 30, 10)
+usar_offline = st.checkbox("Usar Dados Offline (CSV)?", value=False)
 
-# Botão
 if st.button("Analisar"):
     st.session_state["estatistica_selecionada"] = estatistica
-    st.session_state["liga_selecionada"] = liga_selecionada
 
     config = STATS_CONFIG[estatistica]
-    slug = TIMES_JOGADORES_ID[liga_selecionada][time_selecionado][jogador]
+    slug = TIMES_JOGADORES_ID[time_selecionado][jogador]
     nome_para_url = jogador.replace(" ", "-")
 
-    with st.spinner(f"⚽ Buscando informações de {jogador}..."):
-        df = scrape_fbref(
-            slug=slug,
-            nome_jogador=nome_para_url,
-            subpath=config["subpath"],
-            colunas_necessarias=config["colunas_necessarias"],
-            nome_coluna_fbref=config["nome_coluna_fbref"],
-            nome_coluna_final=config["nome_coluna_final"],
-        )
+    with st.spinner("⚽ Buscando informações do jogador..."):
+        if usar_offline:
+            csv_name = f"dados_offline_{time_selecionado}_{jogador}_{estatistica}.csv"
+            csv_name = csv_name.replace(" ", "_")
+            df = load_offline_data(csv_name)
+        else:
+            df = scrape_fbref(
+                slug=slug,
+                nome_jogador=nome_para_url,
+                subpath=config["subpath"],
+                colunas_necessarias=config["colunas_necessarias"],
+                nome_coluna_fbref=config["nome_coluna_fbref"],
+                nome_coluna_final=config["nome_coluna_final"],
+            )
 
     if df.empty:
         st.error("Nenhum dado encontrado (DF vazio).")
         st.session_state["df_jogos"] = pd.DataFrame()
     else:
-        # --- FILTRAR A COMPETIÇÃO CORRETA ---
-        # Se for Premier League => "Premier League"
-        # Se for La Liga => verifique se é "La Liga", "Primera División" etc. 
-        # Precisamos saber como aparece no FBref
-        if liga_selecionada == "Premier League":
-            df = df[df["Competicao"] == "Premier League"]
-        elif liga_selecionada == "La Liga":
-            # No FBref pode vir como "La Liga", "Primera División" etc. 
-            # Ajuste conforme a real nomenclatura encontrada na coluna "Competicao"
-            df = df[df["Competicao"] == "La Liga"]  # ou "Primera División"
+        # Filtra somente Premier League
+        df = df[df["Competicao"] == "Premier League"]
 
-        # Remove jogadores sem atuar
+        # Remove jogadores sem minutos
         df["Minutos"] = pd.to_numeric(df["Minutos"], errors="coerce").fillna(0).astype(int)
         df = df[df["Minutos"] != 0]
 
-        # Converte estatística
+        # Converte a estatística principal
         nome_coluna_principal = config["nome_coluna_final"]
         df[nome_coluna_principal] = (
             pd.to_numeric(df[nome_coluna_principal], errors="coerce")
@@ -699,13 +725,16 @@ if st.button("Analisar"):
             .astype(int)
         )
 
+        # Ordena datas desc
         df["Data"] = pd.to_datetime(df["Data"])
         df.sort_values("Data", ascending=False, inplace=True)
         df.reset_index(drop=True, inplace=True)
 
+        # Pega só os últimos N jogos
         df = df.head(num_jogos)
         df.index = df.index + 1
 
+        # Converte data e local
         df["Data"] = df["Data"].dt.strftime("%d/%m/%y")
         df["CasaFora"] = df["CasaFora"].replace({
             "Home": "Casa",
@@ -713,16 +742,17 @@ if st.button("Analisar"):
             "Neutral": "Neutro"
         })
 
-        # Se não quiser mostrar a coluna Equipe, remova
+        # Se ainda existir a coluna Equipe, remove
         if "Equipe" in df.columns:
             df.drop(columns=["Equipe"], inplace=True)
 
         st.session_state["df_jogos"] = df
 
-# Exibir resultados
+# --------------------------------------------------
+# EXIBIÇÃO DOS RESULTADOS
+# --------------------------------------------------
 df_jogos = st.session_state["df_jogos"]
 estatistica_escolhida = st.session_state["estatistica_selecionada"]
-liga_atual = st.session_state["liga_selecionada"]
 
 if not df_jogos.empty:
     st.markdown("<hr>", unsafe_allow_html=True)
@@ -737,15 +767,10 @@ if not df_jogos.empty:
         df_filtrado.reset_index(drop=True, inplace=True)
         df_filtrado.index = df_filtrado.index + 1
 
-        tabela_html = df_filtrado.to_html(
-            classes="custom-table",
-            index=True,
-            border=0,
-            justify="center"
-        )
+        # Mostra a tabela
+        tabela_html = df_filtrado.to_html(classes="custom-table", index=True, border=0, justify="center")
         st.markdown(tabela_html, unsafe_allow_html=True)
 
-        # Cálculo de média
         if estatistica_escolhida:
             nome_coluna_principal = STATS_CONFIG[estatistica_escolhida]["nome_coluna_final"]
         else:
@@ -774,8 +799,5 @@ if not df_jogos.empty:
 
         df_overs = pd.DataFrame(resultados)
         overs_html = df_overs.to_html(classes="custom-table", index=False, border=0, justify="center")
-        st.markdown(
-            f"<h4>Estatísticas de Over - {estatistica_escolhida}</h4>", 
-            unsafe_allow_html=True
-        )
+        st.markdown(f"<h4>Estatísticas de Over - {estatistica_escolhida}</h4>", unsafe_allow_html=True)
         st.markdown(overs_html, unsafe_allow_html=True)
