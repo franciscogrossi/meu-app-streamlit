@@ -2,6 +2,7 @@ import os
 import time
 import pandas as pd
 import streamlit as st
+from PIL import Image
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -720,16 +721,14 @@ footer {visibility: hidden;}
 st.set_page_config(page_title="Análise - Ligas", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-# Adicionar a logo no canto superior esquerdo com tamanho reduzido
-logo_path = "logo.png"  # Certifique-se de que o arquivo está no diretório do app.py
-st.markdown(
-    f"""
-    <div style="display: flex; align-items: center;">
-        <img src="{logo_path}" width="80">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# Adicionar a logo ao cabeçalho no canto superior esquerdo
+logo_path = "logo.png"  # Certifique-se de que este arquivo está no mesmo diretório do app.py
+
+try:
+    logo = Image.open(logo_path)
+    st.image(logo, width=80)  # Ajuste o tamanho conforme necessário
+except FileNotFoundError:
+    st.error("Erro: A imagem da logo não foi encontrada. Certifique-se de que 'logo.png' está no mesmo diretório do aplicativo.")
 
 # ==============================================
 # APP
