@@ -1,5 +1,6 @@
 import os
 import time
+import base64
 import pandas as pd
 import streamlit as st
 from PIL import Image
@@ -8,6 +9,13 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+
+# ==============================================
+# FUNÇÃO PARA ENCODAR A LOGO EM BASE64
+# ==============================================
+def load_logo_as_base64(logo_path):
+    with open(logo_path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 
 # ==============================================
 # DICIONÁRIO DE LIGAS -> TIMES -> JOGADORES
@@ -649,6 +657,7 @@ def scrape_fbref(slug, nome_jogador, subpath, colunas_necessarias, nome_coluna_f
     all_dfs = pd.read_html(str(soup))
     lista_validas = []
     for df_temp in all_dfs:
+        # Corrige MultiIndex se existir
         if isinstance(df_temp.columns, pd.MultiIndex):
             df_temp.columns = df_temp.columns.droplevel(0)
         if colunas_necessarias.issubset(df_temp.columns):
@@ -705,6 +714,7 @@ h1 {
 }
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+
 .logo-container {
     display: flex;
     align-items: center;
@@ -712,8 +722,17 @@ footer {visibility: hidden;}
     padding: 10px 0;
 }
 .logo-container img {
-    max-width: 120px;
+    max-width: 120px; /* Ajuste o tamanho máximo da logo */
     height: auto;
+}
+.custom-table {
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+.custom-table th, .custom-table td {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    text-align: center;
 }
 </style>
 """
@@ -721,17 +740,25 @@ footer {visibility: hidden;}
 st.set_page_config(page_title="Análise - Ligas", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-# Adicionar a logo ao cabeçalho no canto superior esquerdo
-logo_path = "logo.png"  # Certifique-se de que este arquivo está no mesmo diretório do app.py
-
+# ==============================================
+# EXIBIR A LOGO NO CABEÇALHO (USANDO BASE64 + CSS)
+# ==============================================
+logo_path = "logo.png"
 try:
-    logo = Image.open(logo_path)
-    st.image(logo, width=80)  # Ajuste o tamanho conforme necessário
+    logo_base64 = load_logo_as_base64(logo_path)
+    st.markdown(
+        f"""
+        <div class="logo-container">
+            <img src="data:image/png;base64,{logo_base64}" alt="Logo">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 except FileNotFoundError:
     st.error("Erro: A imagem da logo não foi encontrada. Certifique-se de que 'logo.png' está no mesmo diretório do aplicativo.")
 
 # ==============================================
-# APP
+# APP - SELETORES E CARREGAMENTO DE DADOS
 # ==============================================
 if "df_jogos" not in st.session_state:
     st.session_state["df_jogos"] = pd.DataFrame()
@@ -779,6 +806,7 @@ if st.button("Analisar"):
         st.error("Nenhum dado encontrado (DF vazio). Verifique o CSV ou a raspagem.")
         st.session_state["df_jogos"] = pd.DataFrame()
     else:
+        # Filtrar pela liga selecionada para garantir dados consistentes:
         if liga_selecionada == "Premier League":
             df = df[df["Competicao"] == "Premier League"]
         elif liga_selecionada == "La Liga":
@@ -798,9 +826,11 @@ if st.button("Analisar"):
         df.sort_values("Data", ascending=False, inplace=True)
         df.reset_index(drop=True, inplace=True)
 
+        # Pega apenas os últimos X jogos (slider)
         df = df.head(num_jogos)
         df.index = df.index + 1
 
+        # Formatar data e venue
         df["Data"] = df["Data"].dt.strftime("%d/%m/%y")
         df["CasaFora"] = df["CasaFora"].replace({
             "Home": "Casa",
@@ -808,11 +838,15 @@ if st.button("Analisar"):
             "Neutral": "Neutro"
         })
 
+        # Remover coluna "Equipe" se existir
         if "Equipe" in df.columns:
             df.drop(columns=["Equipe"], inplace=True)
 
         st.session_state["df_jogos"] = df
 
+# ==============================================
+# EXIBIÇÃO DOS RESULTADOS
+# ==============================================
 df_jogos = st.session_state["df_jogos"]
 estatistica_escolhida = st.session_state["estatistica_selecionada"]
 
@@ -829,6 +863,7 @@ if not df_jogos.empty:
         df_filtrado.reset_index(drop=True, inplace=True)
         df_filtrado.index = df_filtrado.index + 1
 
+        # Exibir tabela em HTML
         tabela_html = df_filtrado.to_html(classes="custom-table", index=True, border=0, justify="center")
         st.markdown(tabela_html, unsafe_allow_html=True)
 
