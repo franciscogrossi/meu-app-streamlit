@@ -720,15 +720,9 @@ footer {visibility: hidden;}
 st.set_page_config(page_title="Análise - Ligas", layout="wide")
 st.markdown(PAGE_CSS, unsafe_allow_html=True)
 
-# Adicionar a logo ao cabeçalho
-st.markdown(
-    """
-    <div class="logo-container">
-        <img src="logo.png" alt="Logo">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# Adicionar a logo ao cabeçalho no canto superior esquerdo
+logo_path = "logo.png"  # Certifique-se de que o arquivo está no mesmo diretório do app.py
+st.sidebar.image(logo_path, use_column_width=True)
 
 # ==============================================
 # APP
