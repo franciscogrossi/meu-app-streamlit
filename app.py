@@ -494,6 +494,31 @@ LIGAS = {
     },  # <-- Fim do bloco "Premier League"
 
     "La Liga": {
+        "Alavés": {
+            "Carlos Vicente": "90df343e",
+            "Abdel Abqar": "2bc7f211",
+            "Nahuel Tenaglia": "66654daa",
+            "Antonio Blanco": "506daeac",
+            "Jon Guridi": "4c0a6a48",
+            "Manu Sánchez": "ffacd3d5",
+            "Kiké": "e897d8ba",
+            "Moussa Diarra": "698f11e3",
+            "Ander Guevara": "8e48dc61",
+            "Carlos Martín": "64035864",
+            "Tomás Conechny": "f61143dd",
+            "Santiago Mouriño": "91ee5785",
+            "Stoichkov": "4e257184",
+            "Joan Jordán": "2a0c8ba4",
+            "Toni Martínez": "f3945e07",
+            "Pica": "9b30eda5",
+            "Aleksandar Sedlar": "a35134ae",
+            "Carlos Benavídez": "9fb45456",
+            "Abderrahman Rebbach": "9a796115",
+            "Asier Villalibre": "57be54ec",
+            "Hugo Novoa": "5458f670",
+            "Luka Romero": "ca6edaa0",
+            "Luis Rioja": "eb3dd471"
+        },
         "Barcelona": {
             "Raphinha": "3423f250",
             "Jules Koundé": "4d1666ff",
