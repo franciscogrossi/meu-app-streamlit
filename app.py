@@ -591,7 +591,7 @@ def load_offline_data(csv_path: str) -> pd.DataFrame:
 PAGE_CSS = """
 <style>
 html, body, [class*="css"] {
-    font-size: 20px; /* Ajuste como preferir */
+    font-size: 13px; /* Ajuste como preferir */
     font-family: "Open Sans", sans-serif;
     background-color: #f9f9f9;
 }
