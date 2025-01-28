@@ -592,7 +592,7 @@ LIGAS = {
             "Ronald Araújo": "2bef2bca",
             "Andreas Christensen": "1cb49278"
         },
-    }
+}
 
 # ==============================================
 # CONFIG DE ESTATÍSTICAS
